@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Despensa del Barrio · Demo de tienda online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Concept: the shopping list. The hero is a paper ticket that fills as you add products; everything else stays calm and practical. */
+:root{
+  --bg:#f5f7f2; --surface:#ffffff; --ink:#17201b; --muted:#5d6a62; --line:#dde4dc;
+  --green:#1e6b45; --green-deep:#123f2a; --green-soft:#e3efe7;
+  --sun:#f3b52c; --sun-deep:#c98d06; --tomato:#d23f2d; --tomato-soft:#fbe5e1;
+  --display:'Familjen Grotesk',ui-sans-serif,system-ui,sans-serif;
+  --body:'Figtree',ui-sans-serif,system-ui,sans-serif;
+  --r-s:8px; --r-m:14px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--sun);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px}
+h1,h2,h3{font-family:var(--display);margin:0;letter-spacing:-.01em}
+
+/* demo strip */
+.demo{background:var(--green-deep);color:#e9f3ec;font-size:.82rem;text-align:center;padding:6px 12px}
+
+/* header */
+header{position:sticky;top:0;z-index:20;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar{display:flex;align-items:center;gap:18px;padding-block:12px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;flex-shrink:0}
+.logo-mark{width:40px;height:40px;border-radius:10px;background:var(--green);display:grid;place-items:center}
+.logo b{display:block;font-family:var(--display);font-size:1.08rem;line-height:1.1}
+.logo .sub{display:block;font-size:.78rem;color:var(--muted)}
+.search{flex:1;display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:0 14px;min-width:0}
+.search input{border:0;background:transparent;font:inherit;padding:10px 0;width:100%;outline:none;min-width:0}
+.zone{display:flex;flex-direction:column;font-size:.8rem;color:var(--muted);line-height:1.25;flex-shrink:0}
+.zone b{color:var(--ink);font-weight:600}
+.cart-btn{margin-left:auto;display:flex;align-items:center;gap:10px;background:var(--sun);border:0;border-radius:999px;padding:9px 16px 9px 12px;font-weight:700;flex-shrink:0}
+.cart-btn .count{background:var(--ink);color:#fff;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center;font-size:.78rem}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center;padding-block:44px 36px}
+.hero h1{font-size:clamp(2.2rem,4.6vw,3.6rem);line-height:1.02;font-weight:700;max-width:14ch}
+.hero p.lead{font-size:1.12rem;color:var(--muted);max-width:44ch;margin:16px 0 22px}
+.promises{display:flex;flex-wrap:wrap;gap:10px;margin:0;padding:0;list-style:none}
+.promises li{background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:.92rem}
+.promises li b{color:var(--green)}
+.hero .cta{display:inline-flex;margin-top:24px;background:var(--green);color:#fff;border:0;border-radius:999px;padding:13px 22px;font-weight:700;text-decoration:none}
+
+/* the ticket */
+.ticket{position:relative;background:var(--surface);padding:26px 26px 30px;border-radius:4px;box-shadow:0 18px 40px -22px rgba(18,63,42,.45);transform:rotate(1.4deg);max-width:380px;justify-self:center;width:100%}
+.ticket::before,.ticket::after{content:"";position:absolute;left:0;right:0;height:12px;background:radial-gradient(circle at 8px 0,transparent 7px,var(--surface) 7.5px) 0 0/16px 12px repeat-x}
+.ticket::before{top:-11px;transform:rotate(180deg)}
+.ticket::after{bottom:-11px}
+.ticket h2{font-size:1.25rem;display:flex;justify-content:space-between;align-items:baseline}
+.ticket h2 small{font-family:var(--body);font-weight:500;font-size:.82rem;color:var(--muted)}
+.ticket ul{list-style:none;margin:16px 0;padding:0;border-top:2px dashed var(--line)}
+.ticket li{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:.95rem;align-items:baseline}
+.ticket li .q{color:var(--muted);font-variant-numeric:tabular-nums;min-width:2.2ch}
+.ticket li .p{font-variant-numeric:tabular-nums}
+.ticket li.empty{grid-template-columns:1fr;color:var(--muted);font-style:italic}
+.ticket .tot{display:flex;justify-content:space-between;font-family:var(--display);font-weight:700;font-size:1.3rem}
+.ticket .stamp{margin-top:14px;display:inline-block;border:2px solid var(--green);color:var(--green);font-family:var(--display);font-weight:700;padding:4px 10px;border-radius:6px;transform:rotate(-3deg)}
+.ticket.pulse{animation:pulse .5s ease}
+@keyframes pulse{50%{transform:rotate(1.4deg) scale(1.025)}}
+
+/* categories */
+.cats{display:flex;gap:10px;overflow-x:auto;padding:4px 0 14px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cat{flex-shrink:0;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 16px;font-weight:600;font-size:.94rem}
+.cat[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+section.block{padding-block:20px}
+.block-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;gap:12px}
+.block-head h2{font-size:1.55rem}
+.block-head p{margin:0;color:var(--muted);font-size:.92rem}
+
+/* products */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-m);padding:12px;display:flex;flex-direction:column;gap:8px;position:relative}
+.thumb{aspect-ratio:1/1;border-radius:var(--r-s);display:grid;place-items:center;max-width:100%}
+.thumb svg{width:58%;height:58%}
+.off{position:absolute;top:18px;left:18px;background:var(--tomato);color:#fff;font-weight:700;font-size:.78rem;border-radius:6px;padding:2px 7px}
+.name{font-size:.95rem;line-height:1.3;min-height:2.6em}
+.unit{color:var(--muted);font-size:.82rem}
+.price{display:flex;flex-wrap:wrap;column-gap:8px;align-items:baseline;font-variant-numeric:tabular-nums}
+.price b,.price s{white-space:nowrap}
+input[type=radio]{accent-color:var(--green);width:18px;height:18px}
+.price b{font-family:var(--display);font-size:1.15rem}
+.price s{color:var(--muted);font-size:.86rem}
+.price.deal b{color:var(--tomato)}
+.add{margin-top:auto;border:0;background:var(--green);color:#fff;border-radius:999px;padding:9px;font-weight:700}
+.step{margin-top:auto;display:flex;align-items:center;justify-content:space-between;background:var(--green-soft);border-radius:999px;padding:3px}
+.step button{width:34px;height:34px;border-radius:50%;border:0;background:var(--surface);font-size:1.2rem;font-weight:700;color:var(--green)}
+.step span{font-weight:700;font-variant-numeric:tabular-nums}
+
+/* how it works: real sequence */
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:0;padding:0;list-style:none;counter-reset:s}
+.how li{counter-increment:s;background:var(--green-deep);color:#e9f3ec;border-radius:var(--r-m);padding:20px}
+.how li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--sun);color:var(--ink);font-family:var(--display);font-weight:700;margin-bottom:10px}
+.how h3{color:#fff;font-size:1.12rem;margin-bottom:4px}
+.how p{margin:0;font-size:.93rem;color:#c9dccf}
+
+footer{margin-top:36px;background:var(--surface);border-top:1px solid var(--line);padding-block:24px;color:var(--muted);font-size:.9rem}
+footer .wrap{display:flex;flex-wrap:wrap;gap:16px 32px;justify-content:space-between}
+
+/* cart drawer */
+.scrim{position:fixed;inset:0;background:rgba(18,32,27,.4);opacity:0;pointer-events:none;transition:opacity .2s;z-index:40}
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(420px,100%);background:var(--surface);z-index:50;transform:translateX(100%);transition:transform .25s ease;display:flex;flex-direction:column}
+body.open .scrim{opacity:1;pointer-events:auto}
+body.open .drawer{transform:none}
+.d-head{display:flex;justify-content:space-between;align-items:center;padding:18px 20px;border-bottom:1px solid var(--line)}
+.d-head h2{font-size:1.3rem}
+.close{border:0;background:var(--bg);width:36px;height:36px;border-radius:50%;font-size:1.2rem}
+.d-body{flex:1;overflow:auto;padding:8px 20px}
+.line{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.line .n{font-weight:600;font-size:.95rem}
+.line .s{grid-column:1;color:var(--muted);font-size:.85rem}
+.line .t{grid-row:1/3;grid-column:2;align-self:center;font-weight:700;font-variant-numeric:tabular-nums}
+.d-empty{color:var(--muted);padding:30px 0;text-align:center}
+fieldset{border:0;margin:14px 0 0;padding:0}
+legend{font-weight:700;margin-bottom:8px}
+.opts{display:grid;gap:8px}
+.opts label{display:flex;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:.93rem}
+.opts label:has(input:checked){border-color:var(--green);background:var(--green-soft)}
+.opts small{color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
+.d-foot{border-top:1px solid var(--line);padding:16px 20px calc(16px + env(safe-area-inset-bottom,0px));display:grid;gap:6px}
+.row{display:flex;justify-content:space-between;font-variant-numeric:tabular-nums}
+.row.total{font-family:var(--display);font-weight:700;font-size:1.3rem;margin-top:4px}
+.confirm{margin-top:8px;border:0;background:var(--sun);border-radius:999px;padding:14px;font-weight:700;font-size:1rem}
+.bank{margin-top:10px;border:1px dashed var(--green);border-radius:10px;padding:12px;background:var(--green-soft)}
+.bank-t{margin:0 0 8px;font-weight:700;font-size:.92rem}
+.bank dl{margin:0;display:grid;gap:6px}
+.bank dl div{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center;font-size:.92rem}
+.bank dt{color:var(--muted)}
+.bank dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.copy{border:1px solid var(--green);background:var(--surface);color:var(--green);border-radius:999px;padding:2px 10px;font-size:.78rem;font-weight:700}
+.bank-n{margin:8px 0 0;font-size:.82rem;color:var(--muted)}
+.toast{visibility:hidden;position:fixed;left:50%;bottom:24px;transform:translate(-50%,120px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:999px;z-index:60;transition:transform .25s}
+.toast.show{visibility:visible;transform:translate(-50%,0)}
+#deals{grid-auto-flow:column;grid-auto-columns:minmax(170px,1fr);grid-template-columns:none;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+#deals .card{scroll-snap-align:start}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:28px;padding-block:26px}
+  .zone{display:none}
+  .how{grid-template-columns:1fr}
+}
+@media (max-width:560px){
+  .bar{flex-wrap:wrap;gap:10px}
+  .search{order:3;flex-basis:100%}
+  .logo .sub{display:none}
+  .hero h1{font-size:2.1rem}
+  .hero p.lead{font-size:1rem;margin:12px 0 16px}
+  .promises{gap:8px}
+  .promises li{font-size:.84rem;padding:6px 12px}
+  .hero .cta{margin-top:18px}
+  .ticket{display:none}
+  .cart-btn .label{display:none}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  #deals{grid-auto-columns:46%}
+  .card{padding:10px}
+  .block-head{flex-direction:column;align-items:flex-start;gap:2px}
+  .block-head h2{font-size:1.35rem}
+  .price b{font-size:1.05rem}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="demo">Demo: nombre, productos y precios de ejemplo. El diseño final se define con el cliente.</div>
+
+<header>
+  <div class="wrap bar">
+    <a class="logo" href="#" aria-label="Despensa del Barrio, inicio">
+      <span class="logo-mark" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16l-1.5 10.5a2 2 0 0 1-2 1.5h-9a2 2 0 0 1-2-1.5z"/><path d="M8 9V7a4 4 0 0 1 8 0v2"/></svg></span>
+      <span class="lt"><b>Despensa del Barrio</b><span class="sub">Minisúper con delivery</span></span>
+    </a>
+    <label class="search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Buscar arroz, leche, yerba..." aria-label="Buscar productos"></label>
+    <div class="zone">Entregamos en<b>Capiatá y alrededores</b></div>
+    <button class="cart-btn" id="openCart" aria-label="Ver carrito"><span class="count" id="count">0</span><span class="label">Mi pedido</span><span id="headTotal">Gs 0</span></button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap hero">
+    <div>
+      <h1>Hacé la compra del día sin salir de casa</h1>
+      <p class="lead">Elegí tus productos, confirmá el pedido y te lo llevamos a la puerta. Pagás en efectivo al recibir o por transferencia.</p>
+      <ul class="promises">
+        <li><b>Entrega en el día</b> pidiendo antes de las 18 h</li>
+        <li>Delivery <b>Gs 10.000</b></li>
+        <li><b>Gratis</b> desde Gs 150.000</li>
+        <li>Retiro en el local sin costo</li>
+      </ul>
+      <a class="cta" href="#ofertas">Ver ofertas de la semana</a>
+    </div>
+    <aside class="ticket" id="ticket" aria-live="polite">
+      <h2>Tu lista de hoy <small id="tItems">0 productos</small></h2>
+      <ul id="tList"><li class="empty">Agregá productos y aparecen acá.</li></ul>
+      <div class="tot"><span>Total</span><span id="tTotal">Gs 0</span></div>
+      <div class="stamp">Te lo llevamos hoy</div>
+    </aside>
+  </div>
+
+  <div class="wrap">
+    <nav class="cats" id="cats" aria-label="Categorías"></nav>
+  </div>
+
+  <section class="block" id="ofertas">
+    <div class="wrap">
+      <div class="block-head"><h2>Ofertas de la semana</h2><p>Válidas hasta el domingo</p></div>
+      <div class="grid" id="deals"></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head"><h2 id="allTitle">Todos los productos</h2><p id="allCount"></p></div>
+      <div class="grid" id="all"></div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <div class="block-head"><h2>Cómo funciona</h2></div>
+      <ol class="how">
+        <li><h3>Armá tu pedido</h3><p>Buscá o navegá por categorías y sumá productos al carrito.</p></li>
+        <li><h3>Elegí entrega y pago</h3><p>Delivery a tu casa o retiro en el local. Efectivo al recibir o transferencia.</p></li>
+        <li><h3>Recibilo en tu puerta</h3><p>Te confirmamos por WhatsApp y te avisamos cuando sale el pedido.</p></li>
+      </ol>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Despensa del Barrio · Capiatá, Central</span>
+    <span>Lunes a sábado de 7 a 20 h · Domingos de 8 a 12 h</span>
+    <span>WhatsApp: 09xx xxx xxx</span>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Tu pedido">
+  <div class="d-head"><h2>Tu pedido</h2><button class="close" id="closeCart" aria-label="Cerrar">×</button></div>
+  <div class="d-body">
+    <div id="lines"></div>
+    <fieldset>
+      <legend>Entrega</legend>
+      <div class="opts">
+        <label><input type="radio" name="ship" value="delivery" checked> Delivery a domicilio <small id="shipCost">Gs 10.000</small></label>
+        <label><input type="radio" name="ship" value="pickup"> Retiro en el local <small>Gratis</small></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend>Pago</legend>
+      <div class="opts">
+        <label><input type="radio" name="pay" value="cash" checked> Efectivo al recibir</label>
+        <label><input type="radio" name="pay" value="transfer"> Transferencia bancaria</label>
+      </div>
+      <div class="bank" id="bank" hidden>
+        <p class="bank-t">Transferí a esta cuenta y enviá el comprobante por WhatsApp</p>
+        <dl>
+          <div><dt>Banco</dt><dd>Banco de ejemplo</dd></div>
+          <div><dt>Titular</dt><dd>Despensa del Barrio</dd></div>
+          <div><dt>Cuenta</dt><dd><span id="acc">1234567890</span> <button type="button" class="copy" data-copy="1234567890">Copiar</button></dd></div>
+          <div><dt>Monto</dt><dd><span id="bankAmount">Gs 0</span> <button type="button" class="copy" id="copyAmount" data-copy="0">Copiar</button></dd></div>
+        </dl>
+        <p class="bank-n">Tu pedido queda pendiente de pago hasta que confirmemos la transferencia.</p>
+      </div>
+    </fieldset>
+  </div>
+  <div class="d-foot">
+    <div class="row"><span>Subtotal</span><span id="sub">Gs 0</span></div>
+    <div class="row"><span>Entrega</span><span id="ship">Gs 10.000</span></div>
+    <div class="row total"><span>Total</span><span id="total">Gs 0</span></div>
+    <button class="confirm" id="confirm">Confirmar pedido</button>
+  </div>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const ICON = {
+  carton:'<path d="M7 9l2-5h6l2 5v11H7z"/><path d="M7 9h10"/><path d="M10 13h4"/>',
+  bottle:'<path d="M10 3h4v3l2 3v11a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V9l2-3z"/><path d="M8 13h8"/>',
+  bag:'<path d="M6 8h12l-1 12H7z"/><path d="M8 8l1-4h6l1 4"/><path d="M9 13h6"/>',
+  eggs:'<ellipse cx="8" cy="13" rx="3" ry="4"/><ellipse cx="16" cy="13" rx="3" ry="4"/><path d="M3 18h18"/>',
+  bread:'<path d="M4 11a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v1a2 2 0 0 1-2 2v5H6v-5a2 2 0 0 1-2-2z"/><path d="M9 7l-1 4M13 7l-1 4M17 8l-1 3"/>',
+  fruit:'<circle cx="12" cy="14" r="6"/><path d="M12 8c0-2 1-4 3-5"/><path d="M12 8c-2-1-4-1-5 1"/>',
+  can:'<rect x="7" y="5" width="10" height="15" rx="2"/><path d="M7 9h10M7 16h10"/>',
+  box:'<path d="M4 8l8-4 8 4v9l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v9"/>',
+  meat:'<path d="M14 4c4 0 6 3 6 6 0 5-5 9-10 9-3 0-6-2-6-5 0-6 5-10 10-10z"/><circle cx="14" cy="9" r="1.6"/>'
+};
+const CAT_COLOR = {'Almacén':'#fbefcf','Lácteos':'#e6eff9','Bebidas':'#e3f1ea','Carnicería':'#f9e3df','Frutas y verduras':'#e8f3d8','Panadería':'#f6ead9','Limpieza':'#ece6f7'};
+const P = [
+  {id:1,n:'Arroz tipo 1',u:'1 kg',c:'Almacén',i:'bag',p:9500},
+  {id:2,n:'Fideo tallarín',u:'400 g',c:'Almacén',i:'bag',p:4200,o:5000},
+  {id:3,n:'Aceite de soja',u:'900 ml',c:'Almacén',i:'bottle',p:13900},
+  {id:4,n:'Yerba mate tradicional',u:'500 g',c:'Almacén',i:'bag',p:18900,o:21500},
+  {id:5,n:'Azúcar blanca',u:'1 kg',c:'Almacén',i:'bag',p:7900},
+  {id:6,n:'Leche entera',u:'1 litro',c:'Lácteos',i:'carton',p:8900},
+  {id:7,n:'Huevos frescos',u:'Docena',c:'Lácteos',i:'eggs',p:11900,o:13500},
+  {id:8,n:'Queso Paraguay',u:'Por kg',c:'Lácteos',i:'box',p:42000},
+  {id:9,n:'Gaseosa cola',u:'2 litros',c:'Bebidas',i:'bottle',p:14900},
+  {id:10,n:'Agua mineral sin gas',u:'2 litros',c:'Bebidas',i:'bottle',p:6500},
+  {id:11,n:'Carne molida especial',u:'Por kg',c:'Carnicería',i:'meat',p:38500,o:42000},
+  {id:12,n:'Pollo entero',u:'Por kg',c:'Carnicería',i:'meat',p:19900},
+  {id:13,n:'Banana',u:'Por kg',c:'Frutas y verduras',i:'fruit',p:6500},
+  {id:14,n:'Tomate',u:'Por kg',c:'Frutas y verduras',i:'fruit',p:9900,o:12500},
+  {id:15,n:'Mandioca',u:'Por kg',c:'Frutas y verduras',i:'fruit',p:4500},
+  {id:16,n:'Pan felipe',u:'Por kg',c:'Panadería',i:'bread',p:14000},
+  {id:17,n:'Chipa',u:'Por unidad',c:'Panadería',i:'bread',p:3000},
+  {id:18,n:'Detergente para vajilla',u:'750 ml',c:'Limpieza',i:'bottle',p:9800},
+  {id:19,n:'Jabón en polvo',u:'800 g',c:'Limpieza',i:'box',p:16500,o:18900},
+  {id:20,n:'Puré de tomate',u:'520 g',c:'Almacén',i:'can',p:5200}
+];
+const cart = new Map();
+let cat = 'Todas', q = '';
+const gs = n => 'Gs ' + n.toLocaleString('es-PY').replace(/,/g,'.');
+const $ = s => document.querySelector(s);
+
+function card(p){
+  const qty = cart.get(p.id) || 0;
+  const pct = p.o ? Math.round((1 - p.p/p.o)*100) : 0;
+  return `<article class="card">
+    ${p.o ? `<span class="off">-${pct}%</span>` : ''}
+    <div class="thumb" style="background:${CAT_COLOR[p.c]}"><svg viewBox="0 0 24 24" fill="none" stroke="#17201b" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[p.i]}</svg></div>
+    <div class="name">${p.n}</div><div class="unit">${p.u}</div>
+    <div class="price ${p.o?'deal':''}"><b>${gs(p.p)}</b>${p.o?`<s>${gs(p.o)}</s>`:''}</div>
+    ${qty ? `<div class="step"><button data-dec="${p.id}" aria-label="Quitar uno de ${p.n}">−</button><span>${qty}</span><button data-inc="${p.id}" aria-label="Agregar uno más de ${p.n}">+</button></div>`
+          : `<button class="add" data-inc="${p.id}">Agregar</button>`}
+  </article>`;
+}
+function render(){
+  const cats = ['Todas', ...new Set(P.map(p=>p.c))];
+  $('#cats').innerHTML = cats.map(c=>`<button class="cat" aria-pressed="${c===cat}" data-cat="${c}">${c}</button>`).join('');
+  $('#deals').innerHTML = P.filter(p=>p.o).map(card).join('');
+  const list = P.filter(p => (cat==='Todas'||p.c===cat) && p.n.toLowerCase().includes(q));
+  $('#allTitle').textContent = cat==='Todas' ? 'Todos los productos' : cat;
+  $('#allCount').textContent = list.length + ' productos';
+  $('#all').innerHTML = list.map(card).join('') || '<p>No encontramos productos con ese nombre. Probá con otra palabra.</p>';
+  renderCart();
+}
+function renderCart(){
+  const items = [...cart].map(([id,q])=>({...P.find(p=>p.id===id), q}));
+  const sub = items.reduce((s,i)=>s+i.p*i.q,0);
+  const count = items.reduce((s,i)=>s+i.q,0);
+  const pickup = document.querySelector('input[name=ship]:checked').value==='pickup';
+  const ship = pickup || sub>=150000 || sub===0 ? 0 : 10000;
+  $('#count').textContent = count; $('#headTotal').textContent = gs(sub);
+  $('#tItems').textContent = count + (count===1?' producto':' productos');
+  $('#tList').innerHTML = items.length ? items.slice(-5).map(i=>`<li><span class="q">${i.q}×</span><span>${i.n}</span><span class="p">${gs(i.p*i.q)}</span></li>`).join('') : '<li class="empty">Agregá productos y aparecen acá.</li>';
+  $('#tTotal').textContent = gs(sub);
+  $('#lines').innerHTML = items.length ? items.map(i=>`<div class="line"><span class="n">${i.n}</span><span class="t">${gs(i.p*i.q)}</span><span class="s">${i.q} × ${gs(i.p)} · ${i.u}</span></div>`).join('') : '<p class="d-empty">Tu pedido está vacío. Agregá productos desde la tienda.</p>';
+  $('#sub').textContent = gs(sub);
+  $('#ship').textContent = ship ? gs(ship) : 'Gratis';
+  $('#shipCost').textContent = sub>=150000 ? 'Gratis' : 'Gs 10.000';
+  $('#total').textContent = gs(sub+ship);
+  $('#bankAmount').textContent = gs(sub+ship); $('#copyAmount').dataset.copy = String(sub+ship);
+  $('#bank').hidden = document.querySelector('input[name=pay]:checked').value !== 'transfer';
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('button'); if(!t) return;
+  if (t.dataset.inc){ const id=+t.dataset.inc; cart.set(id,(cart.get(id)||0)+1); render(); const tk=$('#ticket'); tk.classList.remove('pulse'); void tk.offsetWidth; tk.classList.add('pulse'); }
+  if (t.dataset.dec){ const id=+t.dataset.dec; const n=(cart.get(id)||0)-1; n>0?cart.set(id,n):cart.delete(id); render(); }
+  if (t.dataset.copy){ try{ navigator.clipboard.writeText(t.dataset.copy).then(()=>{ t.textContent='Copiado'; setTimeout(()=>t.textContent='Copiar',1500); }).catch(()=>{}); }catch(e){} }
+  if (t.dataset.cat){ cat=t.dataset.cat; render(); }
+  if (t.id==='openCart') document.body.classList.add('open');
+  if (t.id==='closeCart') document.body.classList.remove('open');
+  if (t.id==='confirm'){ const toast=$('#toast'); const tr = document.querySelector('input[name=pay]:checked').value==='transfer'; toast.textContent = !cart.size ? 'Agregá al menos un producto para confirmar el pedido.' : tr ? 'Pedido N.º 1024 recibido. Enviá el comprobante por WhatsApp y lo preparamos.' : 'Pedido N.º 1024 confirmado. Te escribimos por WhatsApp para coordinar la entrega.'; toast.classList.add('show'); setTimeout(()=>toast.classList.remove('show'),3200); }
+});
+$('#scrim').addEventListener('click',()=>document.body.classList.remove('open'));
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.body.classList.remove('open'); });
+document.querySelectorAll('input[name=ship],input[name=pay]').forEach(r=>r.addEventListener('change',renderCart));
+$('#q').addEventListener('input',e=>{ q=e.target.value.toLowerCase().trim(); render(); });
+// demo state: a few items already in the list so the ticket shows its purpose
+[[6,2],[7,1],[4,1],[13,2]].forEach(([id,n])=>cart.set(id,n));
+render();
+</script>
+</body>
+</html>
